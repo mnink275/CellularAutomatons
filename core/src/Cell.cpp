@@ -11,8 +11,8 @@ namespace {
 // TODO: change to std::array for better performance
 const std::unordered_map<Cell::State, sf::Color> kStateColors{
     {Cell::State::kActive, sf::Color::Green},
-    {Cell::State::kInactive, sf::Color::Black},
-    {Cell::State::kBorder, sf::Color::Blue},
+    {Cell::State::kInactive, sf::Color{128, 128, 128}},  // Grey
+    {Cell::State::kBorder, sf::Color{0, 0, 205}},        // Medium Blue
 };
 
 }  // namespace

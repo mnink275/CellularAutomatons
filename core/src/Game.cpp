@@ -6,7 +6,7 @@ namespace ink {
 
 Game::Game()
     : kTimePerFrame(sf::seconds(1 / 60.0f)),
-      window_(sf::VideoMode({1280, 720}), "Cellar Automatons",
+      window_(sf::VideoMode({1920, 1080}), "Cellar Automatons",
               sf::Style::Close),
       world_(window_) {
   window_.setPosition({0, 0});

@@ -48,7 +48,7 @@ World::World(sf::RenderWindow& window)
          x += kCellSize_) {
       sf::RectangleShape rect{{kCellSize_, kCellSize_}};
       rect.setPosition({x, y});
-      rect.setOutlineColor(sf::Color{128, 128, 128});  // Grey
+      rect.setOutlineColor(sf::Color{192, 192, 192});  // Grey
       rect.setOutlineThickness(-kOutlineThickness);
 
       auto default_state = Cell::State::kInactive;
@@ -62,7 +62,7 @@ World::World(sf::RenderWindow& window)
 }
 
 void World::update(const sf::Time dt) {
-  static constexpr auto kStateChangeDuration = sf::seconds(0.1f);
+  static constexpr auto kStateChangeDuration = sf::seconds(1 / 60.0f);
   timer_ += dt;
   if (timer_ >= kStateChangeDuration) {
     timer_ -= kStateChangeDuration;
