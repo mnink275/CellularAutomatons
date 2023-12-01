@@ -32,7 +32,7 @@ World::World(sf::RenderWindow& window)
                     {world_view_.getSize().x, world_view_.getSize().y}),
       field_(),
       updated_field_(),
-      kCellSize_(20.f),
+      kCellSize_(20.0f),
       kCellSizeEps_(0.1f * kCellSize_),
       kRowSize_(std::floor(world_bounds_.width / kCellSize_)),
       kColumnSize_(std::floor(world_bounds_.height / kCellSize_)),
@@ -82,12 +82,23 @@ void World::draw() const {
   }
 }
 
-void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
+void World::handlePlayerInput(const sf::Event event) {
   if (!sf::Mouse::isButtonPressed(sf::Mouse::Left)) return;
+  auto mouse_position = sf::Vector2f{};
+  switch (event.type) {
+    case sf::Event::MouseMoved:
+      mouse_position.x = static_cast<float>(event.mouseMove.x);
+      mouse_position.y = static_cast<float>(event.mouseMove.y);
+      break;
+    case sf::Event::MouseButtonPressed:
+      mouse_position.x = static_cast<float>(event.mouseButton.x);
+      mouse_position.y = static_cast<float>(event.mouseButton.y);
+      break;
+    default:
+      break;
+  }
 
-  const auto curr_mouse_position =
-      sf::Vector2f{static_cast<float>(event.x), static_cast<float>(event.y)};
-  auto cell_idx = findIntersectionBFS(curr_mouse_position);
+  auto cell_idx = findIntersectionBFS(mouse_position);
   if (cell_idx.has_value()) {
     field_[cell_idx.value()].setState(Cell::State::kActive);
   }

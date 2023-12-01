@@ -23,7 +23,7 @@ class World final {
 
   void update(sf::Time dt);
   void draw() const;
-  void handlePlayerInput(const sf::Event::MouseMoveEvent event);
+  void handlePlayerInput(const sf::Event event);
 
  private:
   bool isBorderCell(sf::Vector2f cell_pos) const noexcept;
