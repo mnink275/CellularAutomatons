@@ -6,17 +6,25 @@ namespace ink {
 
 class Cell : public sf::RectangleShape {
  public:
-  enum class State {
-    kActive,
-    kInactive,
-  };
+  enum class State;
 
- public:
   Cell(sf::RectangleShape&& rect);
   Cell(sf::RectangleShape&& rect, State state);
 
   void update(sf::Time dt);
   void SetState(State state);
+  State GetState() const noexcept;
+
+ public:
+  enum class State {
+    kNone,
+    kActive,
+    kInactive,
+    kBorder,
+  };
+
+ private:
+  void UpdateState();
 
  private:
   State state_;

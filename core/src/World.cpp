@@ -1,6 +1,9 @@
 #include <World.hpp>
 
 #include <fmt/format.h>
+#include <cmath>
+
+#include <Utils/Assert.hpp>
 
 namespace ink {
 
@@ -9,17 +12,40 @@ World::World(sf::RenderWindow& window)
       world_view_(window.getDefaultView()),
       world_bounds_({0.f, 0.f},
                     {world_view_.getSize().x, world_view_.getSize().y}) {
-  const auto kCellSize = 20.0f;
+  const auto kCellSize = 20.f;
+  const auto kCellSizeEps = 0.1f * kCellSize;
   const auto kOutlineThickness = 1.0f;
-  for (auto y = 0.0f; y < world_bounds_.height; y += kCellSize) {
-    for (auto x = 0.0f; x < world_bounds_.width; x += kCellSize) {
+  // TODO: Is there a better option to find the "border cells"?
+  static constexpr float kEps = 1e-5;
+  const auto kBorderRect = sf::FloatRect{
+      {0.0f, 0.0f},
+      {std::floor((world_bounds_.width - kCellSizeEps) / kCellSize) * kCellSize,
+       std::floor((world_bounds_.height - kCellSizeEps) / kCellSize) *
+           kCellSize}};
+  ASSERT(kBorderRect.width > 0.0f);
+  ASSERT(kBorderRect.height > 0.0f);
+
+  auto IsBorderCell = [&kBorderRect](float x, float y) {
+    return std::abs(x - kBorderRect.left) < kEps ||
+           std::abs(x - kBorderRect.width) < kEps ||
+           std::abs(y - kBorderRect.top) < kEps ||
+           std::abs(y - kBorderRect.height) < kEps;
+  };
+  for (auto y = kBorderRect.top; y < kBorderRect.height + kCellSizeEps;
+       y += kCellSize) {
+    for (auto x = kBorderRect.left; x < kBorderRect.width + kCellSizeEps;
+         x += kCellSize) {
+      fmt::println("x: {}, y: {}", x, y);
       sf::RectangleShape rect{{kCellSize, kCellSize}};
       rect.setPosition({x, y});
-      rect.setFillColor(sf::Color::White);
       rect.setOutlineColor(sf::Color::Black);
       rect.setOutlineThickness(-kOutlineThickness);
 
-      field_.emplace_back(std::move(rect));
+      auto default_state = Cell::State::kInactive;
+      if (IsBorderCell(x, y)) {
+        default_state = Cell::State::kBorder;
+      }
+      field_.emplace_back(std::move(rect), default_state);
     }
   }
 }
@@ -41,7 +67,9 @@ void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
   const auto kMousePosition =
       sf::Vector2f{static_cast<float>(event.x), static_cast<float>(event.y)};
   for (auto&& cell : field_) {
-    if (!cell.getGlobalBounds().contains(kMousePosition)) continue;
+    if (cell.GetState() == Cell::State::kBorder ||
+        !cell.getGlobalBounds().contains(kMousePosition))
+      continue;
     cell.SetState(Cell::State::kActive);
   }
 }
