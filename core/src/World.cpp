@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <queue>
 
 #include <fmt/format.h>
 
@@ -84,13 +85,11 @@ void World::draw() const {
 void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
   if (!sf::Mouse::isButtonPressed(sf::Mouse::Left)) return;
 
-  const auto kMousePosition =
+  const auto curr_mouse_position =
       sf::Vector2f{static_cast<float>(event.x), static_cast<float>(event.y)};
-  for (auto&& cell : field_) {
-    if (cell.getState() == Cell::State::kBorder ||
-        !cell.getGlobalBounds().contains(kMousePosition))
-      continue;
-    cell.setState(Cell::State::kActive);
+  auto cell_idx = findIntersectionBFS(curr_mouse_position);
+  if (cell_idx.has_value()) {
+    field_[cell_idx.value()].setState(Cell::State::kActive);
   }
 }
 
@@ -130,6 +129,36 @@ Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
   }
 
   return cell_state;
+}
+
+std::optional<std::size_t> World::findIntersectionBFS(
+    const sf::Vector2f mouse_position) {
+  static std::size_t last_touched_cell_idx =
+      kRowSize_ + 1;  // top-left non-border cell
+
+  // TODO: optimize memory usage
+  std::vector<std::size_t> is_visited(field_.size(), 0);
+  std::queue<std::size_t> queue;
+  queue.push(last_touched_cell_idx);
+  while (!queue.empty()) {
+    auto cell_idx = queue.front();
+    queue.pop();
+    if (is_visited[cell_idx]) continue;
+    is_visited[cell_idx] = 1;
+    auto& cell = field_[cell_idx];
+    if (cell.getState() == Cell::State::kBorder) continue;
+    if (cell.getGlobalBounds().contains(mouse_position)) {
+      last_touched_cell_idx = cell_idx;
+      return cell_idx;
+    }
+
+    queue.push(cell_idx - 1);
+    queue.push(cell_idx + 1);
+    queue.push(cell_idx - kRowSize_);
+    queue.push(cell_idx + kRowSize_);
+  }
+
+  return std::nullopt;
 }
 
 }  // namespace ink

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
@@ -27,6 +28,8 @@ class World final {
  private:
   bool isBorderCell(sf::Vector2f cell_pos) const noexcept;
   Cell::State getUpdatedState(std::size_t cell_idx) noexcept;
+  std::optional<std::size_t> findIntersectionBFS(
+      const sf::Vector2f mouse_position);
 
  private:
   sf::RenderWindow& window_;
