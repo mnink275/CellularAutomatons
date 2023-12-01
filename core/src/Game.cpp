@@ -5,10 +5,10 @@
 namespace ink {
 
 Game::Game()
-    : kTimePerFrame(sf::seconds(1.f)),
-      window_(sf::VideoMode({1280, 720}), "Cellar Automatons", sf::Style::Close),
+    : kTimePerFrame(sf::seconds(1 / 60.0f)),
+      window_(sf::VideoMode({1280, 720}), "Cellar Automatons",
+              sf::Style::Close),
       world_(window_) {
-
   window_.setPosition({0, 0});
 }
 
@@ -31,11 +31,11 @@ void Game::processEvents() {
   sf::Event event{};
   while (window_.pollEvent(event)) {
     switch (event.type) {
-      case sf::Event::KeyPressed:
-        world_.handlePlayerInput(event.key.code, true);
+      case sf::Event::MouseButtonPressed:
+        world_.handlePlayerInput(event.mouseButton, true);
         break;
-      case sf::Event::KeyReleased:
-        world_.handlePlayerInput(event.key.code, false);
+      case sf::Event::MouseButtonReleased:
+        world_.handlePlayerInput(event.mouseButton, false);
         break;
       case sf::Event::Closed:
         window_.close();

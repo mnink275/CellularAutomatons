@@ -4,6 +4,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <Cell.hpp>
+
 namespace ink {
 
 class World final {
@@ -20,14 +22,15 @@ class World final {
 
   void update(sf::Time dt);
   void draw() const;
-  void handlePlayerInput(sf::Keyboard::Key key, bool is_pressed);
+  void handlePlayerInput(const sf::Event::MouseButtonEvent key,
+                         const bool is_pressed);
 
  private:
   sf::RenderWindow& window_;
   sf::View world_view_;
   sf::FloatRect world_bounds_;
 
-  std::vector<std::vector<int>> field_;
+  std::vector<Cell> field_;
 };
 
 }  // namespace ink

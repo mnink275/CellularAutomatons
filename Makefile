@@ -10,7 +10,7 @@ build_release/Makefile:
 build_debug/Makefile:
 	@git submodule update --init
 	@mkdir -p build_debug
-	@cd build_debug && cmake --trace-expand -DCMAKE_BUILD_TYPE=Debug -DASAN_ENABLED=True ..
+	@cd build_debug && cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 # Run cmake configuration
 .PHONY: cmake-debug cmake-release
@@ -40,7 +40,6 @@ dist-clean:
 .PHONY: format
 format:
 	@find core -name '*pp' -type f | xargs clang-format -i
-	@find test -name '*pp' -type f | xargs clang-format -i
 
 # Run tests in debug
 .PHONY: tests
