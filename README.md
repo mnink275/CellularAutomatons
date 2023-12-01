@@ -14,13 +14,13 @@
   ```
 - Clonning:
   ```shell
-  git clone https://github.com/mnink275/SFML-KRPG
-  cd SFML-KRPG/
+  git clone https://github.com/mnink275/CellularAutomatons
+  cd CellularAutomatons/
   git submodule update --init
   ```
 - Running:
   ```shell
-  make run
+  make run-release
   ```
 - Hold down the left mouse button and draw!
 
