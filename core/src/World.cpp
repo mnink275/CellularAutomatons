@@ -68,7 +68,7 @@ void World::update(const sf::Time dt) {
     timer_ -= kStateChangeDuration;
 
     for (std::size_t i = 0; i < field_.size(); ++i) {
-      updated_field_[i].SetState(getUpdatedState(i));
+      updated_field_[i].setState(getUpdatedState(i));
     }
     std::swap(field_, updated_field_);
   }
@@ -87,10 +87,10 @@ void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
   const auto kMousePosition =
       sf::Vector2f{static_cast<float>(event.x), static_cast<float>(event.y)};
   for (auto&& cell : field_) {
-    if (cell.GetState() == Cell::State::kBorder ||
+    if (cell.getState() == Cell::State::kBorder ||
         !cell.getGlobalBounds().contains(kMousePosition))
       continue;
-    cell.SetState(Cell::State::kActive);
+    cell.setState(Cell::State::kActive);
   }
 }
 
@@ -104,7 +104,7 @@ bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
 
 Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
   auto& cell = field_[cell_idx];
-  auto cell_state = cell.GetState();
+  auto cell_state = cell.getState();
   if (cell_state == Cell::State::kBorder) return cell_state;
 
   // Moore neighborhood
@@ -118,7 +118,7 @@ Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
   std::size_t alive_count =
       std::count_if(neighborhood_indexes.begin(), neighborhood_indexes.end(),
                     [this](std::size_t idx) {
-                      return field_[idx].GetState() == Cell::State::kActive;
+                      return field_[idx].getState() == Cell::State::kActive;
                     });
 
   if (cell_state == Cell::State::kActive &&

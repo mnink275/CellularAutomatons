@@ -11,8 +11,8 @@ class Cell : public sf::RectangleShape {
   Cell(sf::RectangleShape&& rect);
   Cell(sf::RectangleShape&& rect, State state);
 
-  void SetState(State state);
-  State GetState() const noexcept;
+  void setState(State state);
+  State getState() const noexcept;
 
  public:
   enum class State {
@@ -21,9 +21,6 @@ class Cell : public sf::RectangleShape {
     kInactive,
     kBorder,
   };
-
- private:
-  void ChangeState();
 
  private:
   State state_;

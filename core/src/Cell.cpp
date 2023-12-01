@@ -22,27 +22,14 @@ Cell::Cell(sf::RectangleShape&& rect)
 
 Cell::Cell(sf::RectangleShape&& rect, State state)
     : sf::RectangleShape(std::move(rect)), state_(State::kNone) {
-  SetState(state);
+  setState(state);
 }
 
-void Cell::SetState(State state) {
+void Cell::setState(State state) {
   state_ = state;
   setFillColor(kStateColors.at(state));
 }
 
-Cell::State Cell::GetState() const noexcept { return state_; }
-
-void Cell::ChangeState() {
-  switch (state_) {
-    case State::kActive:
-      SetState(State::kInactive);
-      break;
-    case State::kInactive:
-      SetState(State::kActive);
-      break;
-    default:
-      break;
-  }
-}
+Cell::State Cell::getState() const noexcept { return state_; }
 
 }  // namespace ink
