@@ -11,10 +11,12 @@ class Cell : public sf::RectangleShape {
     kInactive,
   };
 
+ public:
   Cell(sf::RectangleShape&& rect);
   Cell(sf::RectangleShape&& rect, State state);
 
   void update(sf::Time dt);
+  void SetState(State state);
 
  private:
   State state_;

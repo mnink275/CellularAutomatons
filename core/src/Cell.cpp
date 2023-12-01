@@ -32,14 +32,18 @@ void Cell::update(sf::Time dt) {
     // TODO: move to ChangeState method
     switch (state_) {
       case State::kActive:
-        state_ = State::kInactive;
+        SetState(State::kInactive);
         break;
       case State::kInactive:
-        state_ = State::kActive;
+        SetState(State::kActive);
         break;
     }
-    setFillColor(kStateColors.at(state_));
   }
+}
+
+void Cell::SetState(State state) {
+  state_ = state;
+  setFillColor(kStateColors.at(state));
 }
 
 }  // namespace ink

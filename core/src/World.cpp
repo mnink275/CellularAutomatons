@@ -35,21 +35,14 @@ void World::draw() const {
   }
 }
 
-void World::handlePlayerInput(const sf::Event::MouseButtonEvent key,
-                              const bool is_pressed) {
-  if (!is_pressed) return;
+void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
+  if (!sf::Mouse::isButtonPressed(sf::Mouse::Left)) return;
 
-  const auto kMousePoint =
-      sf::Vector2f{static_cast<float>(key.x), static_cast<float>(key.y)};
-  switch (key.button) {
-    case sf::Mouse::Button::Left:
-      for (auto&& cell : field_) {
-        if (!cell.getGlobalBounds().contains(kMousePoint)) continue;
-        cell.setFillColor(sf::Color::Green);
-      }
-      break;
-    default:
-      fmt::println("The key wasn't implemented");
+  const auto kMousePosition =
+      sf::Vector2f{static_cast<float>(event.x), static_cast<float>(event.y)};
+  for (auto&& cell : field_) {
+    if (!cell.getGlobalBounds().contains(kMousePosition)) continue;
+    cell.SetState(Cell::State::kActive);
   }
 }
 

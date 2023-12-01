@@ -31,11 +31,8 @@ void Game::processEvents() {
   sf::Event event{};
   while (window_.pollEvent(event)) {
     switch (event.type) {
-      case sf::Event::MouseButtonPressed:
-        world_.handlePlayerInput(event.mouseButton, true);
-        break;
-      case sf::Event::MouseButtonReleased:
-        world_.handlePlayerInput(event.mouseButton, false);
+      case sf::Event::MouseMoved:
+        world_.handlePlayerInput(event.mouseMove);
         break;
       case sf::Event::Closed:
         window_.close();

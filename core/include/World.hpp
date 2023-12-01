@@ -22,8 +22,7 @@ class World final {
 
   void update(sf::Time dt);
   void draw() const;
-  void handlePlayerInput(const sf::Event::MouseButtonEvent key,
-                         const bool is_pressed);
+  void handlePlayerInput(const sf::Event::MouseMoveEvent event);
 
  private:
   sf::RenderWindow& window_;
