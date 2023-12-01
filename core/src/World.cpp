@@ -113,6 +113,7 @@ bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
 }
 
 Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
+  // Rule 110 CA implementaion
   auto& cell = field_[cell_idx];
   auto cell_state = cell.getState();
   if (cell_state == Cell::State::kBorder) return cell_state;
@@ -144,6 +145,8 @@ Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
 
 std::optional<std::size_t> World::findIntersectionBFS(
     const sf::Vector2f mouse_position) {
+  // Running the search bfs algorithm from the last touched cell
+  // There is a high probability that the cursor is nearby
   static std::size_t last_touched_cell_idx =
       kRowSize_ + 1;  // top-left non-border cell
 
