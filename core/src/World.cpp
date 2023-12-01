@@ -1,57 +1,77 @@
 #include <World.hpp>
 
-#include <fmt/format.h>
+#include <array>
 #include <cmath>
+#include <functional>
+
+#include <fmt/format.h>
 
 #include <Utils/Assert.hpp>
 
 namespace ink {
 
+namespace {
+
+// TODO: Is there a better option to find the "border cells"?
+auto BorderRectInit = [](const float cell_size, const float cell_size_eps,
+                         const sf::FloatRect world_bounds) {
+  return sf::FloatRect{
+      {0.0f, 0.0f},
+      {std::floor((world_bounds.width - cell_size_eps) / cell_size) * cell_size,
+       std::floor((world_bounds.height - cell_size_eps) / cell_size) *
+           cell_size}};
+};
+
+}  // namespace
+
 World::World(sf::RenderWindow& window)
     : window_(window),
       world_view_(window.getDefaultView()),
       world_bounds_({0.f, 0.f},
-                    {world_view_.getSize().x, world_view_.getSize().y}) {
-  const auto kCellSize = 20.f;
-  const auto kCellSizeEps = 0.1f * kCellSize;
-  const auto kOutlineThickness = 1.0f;
-  // TODO: Is there a better option to find the "border cells"?
-  static constexpr float kEps = 1e-5;
-  const auto kBorderRect = sf::FloatRect{
-      {0.0f, 0.0f},
-      {std::floor((world_bounds_.width - kCellSizeEps) / kCellSize) * kCellSize,
-       std::floor((world_bounds_.height - kCellSizeEps) / kCellSize) *
-           kCellSize}};
-  ASSERT(kBorderRect.width > 0.0f);
-  ASSERT(kBorderRect.height > 0.0f);
-
-  auto IsBorderCell = [&kBorderRect](float x, float y) {
-    return std::abs(x - kBorderRect.left) < kEps ||
-           std::abs(x - kBorderRect.width) < kEps ||
-           std::abs(y - kBorderRect.top) < kEps ||
-           std::abs(y - kBorderRect.height) < kEps;
-  };
-  for (auto y = kBorderRect.top; y < kBorderRect.height + kCellSizeEps;
-       y += kCellSize) {
-    for (auto x = kBorderRect.left; x < kBorderRect.width + kCellSizeEps;
-         x += kCellSize) {
-      fmt::println("x: {}, y: {}", x, y);
-      sf::RectangleShape rect{{kCellSize, kCellSize}};
+                    {world_view_.getSize().x, world_view_.getSize().y}),
+      field_(),
+      updated_field_(),
+      kCellSize_(20.f),
+      kCellSizeEps_(0.1f * kCellSize_),
+      kRowSize_(std::floor(world_bounds_.width / kCellSize_)),
+      kColumnSize_(std::floor(world_bounds_.height / kCellSize_)),
+      kBorderRect_(std::invoke(BorderRectInit, kCellSize_, kCellSizeEps_,
+                               world_bounds_)),
+      timer_(sf::Time::Zero) {
+  ASSERT(kBorderRect_.width > 0.0f);
+  ASSERT(kBorderRect_.height > 0.0f);
+  const auto kOutlineThickness = 0.5f;
+  field_.reserve(kRowSize_ * kColumnSize_);
+  for (auto y = kBorderRect_.top; y < kBorderRect_.height + kCellSizeEps_;
+       y += kCellSize_) {
+    for (auto x = kBorderRect_.left; x < kBorderRect_.width + kCellSizeEps_;
+         x += kCellSize_) {
+      sf::RectangleShape rect{{kCellSize_, kCellSize_}};
       rect.setPosition({x, y});
-      rect.setOutlineColor(sf::Color::Black);
+      rect.setOutlineColor(sf::Color{128, 128, 128});  // Grey
       rect.setOutlineThickness(-kOutlineThickness);
 
       auto default_state = Cell::State::kInactive;
-      if (IsBorderCell(x, y)) {
+      if (isBorderCell({x, y})) {
         default_state = Cell::State::kBorder;
       }
       field_.emplace_back(std::move(rect), default_state);
     }
   }
+  updated_field_ = field_;
 }
 
 void World::update(const sf::Time dt) {
-  for (auto&& cell : field_) cell.update(dt);
+  static constexpr auto kStateChangeDuration = sf::seconds(0.1f);
+  timer_ += dt;
+  if (timer_ >= kStateChangeDuration) {
+    timer_ -= kStateChangeDuration;
+
+    for (std::size_t i = 0; i < field_.size(); ++i) {
+      updated_field_[i].SetState(getUpdatedState(i));
+    }
+    std::swap(field_, updated_field_);
+  }
 }
 
 void World::draw() const {
@@ -72,6 +92,44 @@ void World::handlePlayerInput(const sf::Event::MouseMoveEvent event) {
       continue;
     cell.SetState(Cell::State::kActive);
   }
+}
+
+bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
+  static constexpr float kEps = 1e-5;
+  return std::abs(cell_pos.x - kBorderRect_.left) < kEps ||
+         std::abs(cell_pos.x - kBorderRect_.width) < kEps ||
+         std::abs(cell_pos.y - kBorderRect_.top) < kEps ||
+         std::abs(cell_pos.y - kBorderRect_.height) < kEps;
+}
+
+Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
+  auto& cell = field_[cell_idx];
+  auto cell_state = cell.GetState();
+  if (cell_state == Cell::State::kBorder) return cell_state;
+
+  // Moore neighborhood
+  std::array<std::size_t, 8> neighborhood_indexes{
+      // top cells
+      cell_idx - kRowSize_ - 1, cell_idx - kRowSize_, cell_idx - kRowSize_ + 1,
+      // left and right cells
+      cell_idx - 1, cell_idx + 1,
+      // bottom cells
+      cell_idx + kRowSize_ - 1, cell_idx + kRowSize_, cell_idx + kRowSize_ + 1};
+  std::size_t alive_count =
+      std::count_if(neighborhood_indexes.begin(), neighborhood_indexes.end(),
+                    [this](std::size_t idx) {
+                      return field_[idx].GetState() == Cell::State::kActive;
+                    });
+
+  if (cell_state == Cell::State::kActive &&
+      (alive_count < 2 || alive_count > 3)) {
+    return Cell::State::kInactive;
+  }
+  if (cell_state == Cell::State::kInactive && alive_count == 3) {
+    return Cell::State::kActive;
+  }
+
+  return cell_state;
 }
 
 }  // namespace ink

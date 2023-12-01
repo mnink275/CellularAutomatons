@@ -11,7 +11,7 @@ namespace {
 // TODO: change to std::array for better performance
 const std::unordered_map<Cell::State, sf::Color> kStateColors{
     {Cell::State::kActive, sf::Color::Green},
-    {Cell::State::kInactive, sf::Color::White},
+    {Cell::State::kInactive, sf::Color::Black},
     {Cell::State::kBorder, sf::Color::Blue},
 };
 
@@ -21,19 +21,8 @@ Cell::Cell(sf::RectangleShape&& rect)
     : Cell(std::move(rect), State::kInactive) {}
 
 Cell::Cell(sf::RectangleShape&& rect, State state)
-    : sf::RectangleShape(std::move(rect)),
-      state_(State::kNone),
-      timer_(sf::Time::Zero) {
+    : sf::RectangleShape(std::move(rect)), state_(State::kNone) {
   SetState(state);
-}
-
-void Cell::update(sf::Time dt) {
-  static constexpr auto kStateChangeDuration = sf::seconds(1.0f);
-  timer_ += dt;
-  if (timer_ >= kStateChangeDuration) {
-    timer_ -= kStateChangeDuration;
-    UpdateState();
-  }
 }
 
 void Cell::SetState(State state) {
@@ -43,7 +32,7 @@ void Cell::SetState(State state) {
 
 Cell::State Cell::GetState() const noexcept { return state_; }
 
-void Cell::UpdateState() {
+void Cell::ChangeState() {
   switch (state_) {
     case State::kActive:
       SetState(State::kInactive);

@@ -11,7 +11,6 @@ class Cell : public sf::RectangleShape {
   Cell(sf::RectangleShape&& rect);
   Cell(sf::RectangleShape&& rect, State state);
 
-  void update(sf::Time dt);
   void SetState(State state);
   State GetState() const noexcept;
 
@@ -24,11 +23,10 @@ class Cell : public sf::RectangleShape {
   };
 
  private:
-  void UpdateState();
+  void ChangeState();
 
  private:
   State state_;
-  sf::Time timer_;
 };
 
 }  // namespace ink
