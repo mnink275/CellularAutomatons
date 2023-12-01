@@ -1,6 +1,6 @@
-# Cellar Automatons
+# Cellular Automatons
 
-- Cellar Automatons implementaion with visualization using SFML graphics.
+- Cellular automatons implementaion with visualization using SFML graphics.
 
 - Features:
   - [x] Rule 110
