@@ -4,8 +4,8 @@
 
 - Features:
   - [x] Rule 110
-  - [ ] Rule 30
-  - [ ] Rule 60
+  - [x] Rule 30
+  - [x] Rule 60
 
 ## How to Use:
 - Installing SFML dependencies:
