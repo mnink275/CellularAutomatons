@@ -15,3 +15,6 @@ target_include_directories(
 target_link_libraries(
     ${PROJECT_NAME}_objs sfml-graphics fmt
 )
+target_compile_definitions(
+    ${PROJECT_NAME}_objs PUBLIC RESOURCE_FOLDER="${RESOURCE_FOLDER}"
+)

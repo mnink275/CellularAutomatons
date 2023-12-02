@@ -2,12 +2,15 @@
 
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 
+#include <Buttons/RuleActivateButton.hpp>
 #include <Cell.hpp>
 #include <Rules/Rule.hpp>
+#include <Rules/RuleTypes.hpp>
 
 namespace ink {
 
@@ -33,6 +36,11 @@ class World final {
   std::optional<std::size_t> findIntersectionBFS(
       const sf::Vector2f mouse_position);
 
+  void initRules();
+  void initButtons();
+
+  void resetFields();
+
  private:
   sf::RenderWindow& window_;
   sf::View world_view_;
@@ -47,8 +55,14 @@ class World final {
   const std::size_t kColumnSize_;
   const sf::FloatRect kBorderRect_;
   sf::Time timer_;
+  sf::Font font_;
 
-  std::unique_ptr<Rule> rule_;
+  using RuleUPtr = std::unique_ptr<Rule>;
+  std::unordered_map<RuleNumber, RuleUPtr> rules_holder_;
+  Rule* active_rule_;
+
+  using ButtonUPtr = std::unique_ptr<RuleActivateButton>;
+  std::vector<ButtonUPtr> buttons_holder_;
 };
 
 }  // namespace ink

@@ -6,7 +6,10 @@
 
 #include <fmt/format.h>
 
+#include <Buttons/RuleActivateButton.hpp>
 #include <Rules/Rule110.hpp>
+#include <Rules/Rule30.hpp>
+#include <Rules/Rule60.hpp>
 #include <Utils/Assert.hpp>
 
 namespace ink {
@@ -39,8 +42,13 @@ World::World(sf::RenderWindow& window)
       kBorderRect_(std::invoke(BorderRectInit, kCellSize_, kCellSizeEps_,
                                world_bounds_)),
       timer_(sf::Time::Zero),
-      rule_(
-          std::make_unique<Rule110<Neighborhood::kMoore>>(field_, kRowSize_)) {
+      font_(),
+      rules_holder_(),
+      active_rule_(nullptr) {
+  auto font_file_path = std::string{RESOURCE_FOLDER} + "/Expressway.ttf";
+  if (!font_.loadFromFile(font_file_path)) {
+    throw std::runtime_error("Failed to load " + font_file_path);
+  }
   ASSERT(kBorderRect_.width > 0.0f);
   ASSERT(kBorderRect_.height > 0.0f);
   const auto kOutlineThickness = 0.5f;
@@ -62,6 +70,9 @@ World::World(sf::RenderWindow& window)
     }
   }
   updated_field_ = field_;
+
+  initRules();
+  initButtons();
 }
 
 void World::update(const sf::Time dt) {
@@ -81,6 +92,9 @@ void World::draw() const {
   window_.setView(world_view_);
   for (auto&& cell : field_) {
     window_.draw(cell);
+  }
+  for (auto&& button : buttons_holder_) {
+    window_.draw(*button);
   }
 }
 
@@ -112,6 +126,14 @@ void World::handlePlayerInput(const sf::Event event) {
 
   if (new_state == Cell::State::kNone) return;
 
+  for (auto&& button : buttons_holder_) {
+    if (button->contains(mouse_position)) {
+      resetFields();
+      active_rule_ = rules_holder_[button->getRuleNumber()].get();
+      return;
+    }
+  }
+
   auto cell_idx = findIntersectionBFS(mouse_position);
   if (cell_idx.has_value()) {
     field_[cell_idx.value()].setState(new_state);
@@ -127,7 +149,7 @@ bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
 }
 
 Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
-  return rule_->getUpdatedState(cell_idx);
+  return active_rule_->getUpdatedState(cell_idx);
 }
 
 std::optional<std::size_t> World::findIntersectionBFS(
@@ -160,6 +182,41 @@ std::optional<std::size_t> World::findIntersectionBFS(
   }
 
   return std::nullopt;
+}
+
+void World::initRules() {
+  rules_holder_[RuleNumber::k110] =
+      std::make_unique<Rule110<Neighborhood::kMoore>>(field_, kRowSize_);
+  rules_holder_[RuleNumber::k60] = std::make_unique<Rule60>(field_, kRowSize_);
+  rules_holder_[RuleNumber::k30] = std::make_unique<Rule30>(field_, kRowSize_);
+
+  active_rule_ = rules_holder_[RuleNumber::k110].get();
+}
+
+void World::initButtons() {
+  const auto start_pos = world_bounds_.getPosition() * 0.8f;
+  auto button_rect = sf::RectangleShape{{60.0f, 30.0f}};
+  button_rect.setFillColor(sf::Color::Black);
+
+  button_rect.setPosition(start_pos);
+  buttons_holder_.emplace_back(std::make_unique<RuleActivateButton>(
+      font_, "Rule 110", button_rect, RuleNumber::k110));
+
+  button_rect.setPosition(start_pos + sf::Vector2f{0.0f, 40.0f});
+  buttons_holder_.emplace_back(std::make_unique<RuleActivateButton>(
+      font_, "Rule 60", button_rect, RuleNumber::k60));
+
+  button_rect.setPosition(start_pos + sf::Vector2f{0.0f, 80.0f});
+  buttons_holder_.emplace_back(std::make_unique<RuleActivateButton>(
+      font_, "Rule 30", button_rect, RuleNumber::k30));
+}
+
+void World::resetFields() {
+  for (auto&& cell : field_) {
+    if (cell.getState() == Cell::State::kBorder) continue;
+    cell.setState(Cell::State::kInactive);
+  }
+  updated_field_ = field_;
 }
 
 }  // namespace ink
