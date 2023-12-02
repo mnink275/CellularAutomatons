@@ -1,12 +1,12 @@
 #include <World.hpp>
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <queue>
 
 #include <fmt/format.h>
 
+#include <Rules/Rule110.hpp>
 #include <Utils/Assert.hpp>
 
 namespace ink {
@@ -38,7 +38,9 @@ World::World(sf::RenderWindow& window)
       kColumnSize_(std::floor(world_bounds_.height / kCellSize_)),
       kBorderRect_(std::invoke(BorderRectInit, kCellSize_, kCellSizeEps_,
                                world_bounds_)),
-      timer_(sf::Time::Zero) {
+      timer_(sf::Time::Zero),
+      rule_(
+          std::make_unique<Rule110<Neighborhood::kMoore>>(field_, kRowSize_)) {
   ASSERT(kBorderRect_.width > 0.0f);
   ASSERT(kBorderRect_.height > 0.0f);
   const auto kOutlineThickness = 0.5f;
@@ -125,34 +127,7 @@ bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
 }
 
 Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
-  // Rule 110 CA implementaion
-  auto& cell = field_[cell_idx];
-  auto cell_state = cell.getState();
-  if (cell_state == Cell::State::kBorder) return cell_state;
-
-  // Moore neighborhood
-  std::array<std::size_t, 8> neighborhood_indexes{
-      // top cells
-      cell_idx - kRowSize_ - 1, cell_idx - kRowSize_, cell_idx - kRowSize_ + 1,
-      // left and right cells
-      cell_idx - 1, cell_idx + 1,
-      // bottom cells
-      cell_idx + kRowSize_ - 1, cell_idx + kRowSize_, cell_idx + kRowSize_ + 1};
-  std::size_t alive_count =
-      std::count_if(neighborhood_indexes.begin(), neighborhood_indexes.end(),
-                    [this](std::size_t idx) {
-                      return field_[idx].getState() == Cell::State::kActive;
-                    });
-
-  if (cell_state == Cell::State::kActive &&
-      (alive_count < 2 || alive_count > 3)) {
-    return Cell::State::kInactive;
-  }
-  if (cell_state == Cell::State::kInactive && alive_count == 3) {
-    return Cell::State::kActive;
-  }
-
-  return cell_state;
+  return rule_->getUpdatedState(cell_idx);
 }
 
 std::optional<std::size_t> World::findIntersectionBFS(

@@ -1,11 +1,13 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 
 #include <Cell.hpp>
+#include <Rules/Rule.hpp>
 
 namespace ink {
 
@@ -45,6 +47,8 @@ class World final {
   const std::size_t kColumnSize_;
   const sf::FloatRect kBorderRect_;
   sf::Time timer_;
+
+  std::unique_ptr<Rule> rule_;
 };
 
 }  // namespace ink
