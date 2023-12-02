@@ -83,24 +83,36 @@ void World::draw() const {
 }
 
 void World::handlePlayerInput(const sf::Event event) {
-  if (!sf::Mouse::isButtonPressed(sf::Mouse::Left)) return;
+  auto new_state = Cell::State::kNone;
   auto mouse_position = sf::Vector2f{};
   switch (event.type) {
     case sf::Event::MouseMoved:
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        new_state = Cell::State::kActive;
+      } else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+        new_state = Cell::State::kInactive;
+      }
       mouse_position.x = static_cast<float>(event.mouseMove.x);
       mouse_position.y = static_cast<float>(event.mouseMove.y);
       break;
     case sf::Event::MouseButtonPressed:
+      if (event.mouseButton.button == sf::Mouse::Left) {
+        new_state = Cell::State::kActive;
+      } else if (event.mouseButton.button == sf::Mouse::Right) {
+        new_state = Cell::State::kInactive;
+      }
       mouse_position.x = static_cast<float>(event.mouseButton.x);
       mouse_position.y = static_cast<float>(event.mouseButton.y);
       break;
     default:
-      break;
+      return;
   }
+
+  if (new_state == Cell::State::kNone) return;
 
   auto cell_idx = findIntersectionBFS(mouse_position);
   if (cell_idx.has_value()) {
-    field_[cell_idx.value()].setState(Cell::State::kActive);
+    field_[cell_idx.value()].setState(new_state);
   }
 }
 
