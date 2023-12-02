@@ -22,6 +22,7 @@
   ```shell
   make run-release
   ```
-- Hold down the left mouse button and draw!
-
+- Controlling:
+  - Left mouse button to draw.
+  - Right mouse button to erase.
 ![Demo](GameOfLife_Rule110.png)
