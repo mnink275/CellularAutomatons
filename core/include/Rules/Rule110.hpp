@@ -14,12 +14,12 @@ enum class Neighborhood {
 };
 
 template <Neighborhood NHValue>
-class Rule110 : public Rule {
+class Rule110 final : public Rule {
  public:
   Rule110(const std::vector<Cell>& field, const std::size_t row_size)
       : Rule(field, row_size) {}
 
-  virtual Cell::State getUpdatedState(std::size_t cell_idx) const noexcept {
+  Cell::State getUpdatedState(std::size_t cell_idx) const noexcept override {
     // Rule 110 CA implementaion
     auto& cell = field_[cell_idx];
     auto cell_state = cell.getState();

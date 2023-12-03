@@ -5,7 +5,7 @@
 
 namespace ink {
 
-class RuleActivateButton : public Button {
+class RuleActivateButton final : public Button {
  public:
   RuleActivateButton(const sf::Font& font, std::string name,
                      sf::RectangleShape rect, RuleNumber rule_number);

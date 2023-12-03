@@ -12,6 +12,13 @@ class Rule {
   Rule(const std::vector<Cell>& field, const std::size_t row_size)
       : field_(field), kRowSize_(row_size) {}
 
+  Rule(const Rule&) = delete;
+  Rule(Rule&&) = default;
+  Rule& operator=(const Rule&) = delete;
+  Rule& operator=(Rule&&) = default;
+
+  virtual ~Rule() = default;
+
   virtual Cell::State getUpdatedState(std::size_t cell_idx) const noexcept = 0;
 
  protected:

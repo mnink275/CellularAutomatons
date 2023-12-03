@@ -4,11 +4,11 @@
 
 namespace ink {
 
-class Rule30 : public Rule {
+class Rule30 final : public Rule {
  public:
   using Rule::Rule;
 
-  virtual Cell::State getUpdatedState(std::size_t cell_idx) const noexcept;
+  Cell::State getUpdatedState(std::size_t cell_idx) const noexcept override;
 };
 
 }  // namespace ink

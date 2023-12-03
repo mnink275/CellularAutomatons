@@ -4,7 +4,7 @@
 
 namespace ink {
 
-class Cell : public sf::RectangleShape {
+class Cell final : public sf::RectangleShape {
  public:
   enum class State;
 
