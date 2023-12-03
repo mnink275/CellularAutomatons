@@ -15,7 +15,7 @@ class Rule {
   Rule(const Rule&) = delete;
   Rule(Rule&&) = default;
   Rule& operator=(const Rule&) = delete;
-  Rule& operator=(Rule&&) = default;
+  Rule& operator=(Rule&&) = delete;
 
   virtual ~Rule() = default;
 
