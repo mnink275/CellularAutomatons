@@ -17,8 +17,9 @@ namespace ink {
 namespace {
 
 // TODO: Is there a better option to find the "border cells"?
-auto BorderRectInit = [](const float cell_size, const float cell_size_eps,
-                         const sf::FloatRect world_bounds) {
+const auto borderCellsRectIniter = [](const float cell_size,
+                                      const float cell_size_eps,
+                                      const sf::FloatRect& world_bounds) {
   return sf::FloatRect{
       {0.0f, 0.0f},
       {std::floor((world_bounds.width - cell_size_eps) / cell_size) * cell_size,
@@ -39,8 +40,8 @@ World::World(sf::RenderWindow& window)
       kCellSizeEps_(0.1f * kCellSize_),
       kRowSize_(std::floor(world_bounds_.width / kCellSize_)),
       kColumnSize_(std::floor(world_bounds_.height / kCellSize_)),
-      kBorderRect_(std::invoke(BorderRectInit, kCellSize_, kCellSizeEps_,
-                               world_bounds_)),
+      kBorderCellsRect_(std::invoke(borderCellsRectIniter, kCellSize_,
+                                    kCellSizeEps_, world_bounds_)),
       timer_(sf::Time::Zero),
       font_(),
       rules_holder_(),
@@ -49,14 +50,14 @@ World::World(sf::RenderWindow& window)
   if (!font_.loadFromFile(font_file_path)) {
     throw std::runtime_error("Failed to load " + font_file_path);
   }
-  ASSERT(kBorderRect_.width > 0.0f);
-  ASSERT(kBorderRect_.height > 0.0f);
+  ASSERT(kBorderCellsRect_.width > 0.0f);
+  ASSERT(kBorderCellsRect_.height > 0.0f);
   const auto kOutlineThickness = 0.5f;
   field_.reserve(kRowSize_ * kColumnSize_);
-  for (auto y = kBorderRect_.top; y < kBorderRect_.height + kCellSizeEps_;
-       y += kCellSize_) {
-    for (auto x = kBorderRect_.left; x < kBorderRect_.width + kCellSizeEps_;
-         x += kCellSize_) {
+  for (auto y = kBorderCellsRect_.top;
+       y < kBorderCellsRect_.height + kCellSizeEps_; y += kCellSize_) {
+    for (auto x = kBorderCellsRect_.left;
+         x < kBorderCellsRect_.width + kCellSizeEps_; x += kCellSize_) {
       sf::RectangleShape rect{{kCellSize_, kCellSize_}};
       rect.setPosition({x, y});
       rect.setOutlineColor(sf::Color{192, 192, 192});  // Grey
@@ -142,10 +143,10 @@ void World::handlePlayerInput(const sf::Event event) {
 
 bool World::isBorderCell(sf::Vector2f cell_pos) const noexcept {
   static constexpr float kEps = 1e-5;
-  return std::abs(cell_pos.x - kBorderRect_.left) < kEps ||
-         std::abs(cell_pos.x - kBorderRect_.width) < kEps ||
-         std::abs(cell_pos.y - kBorderRect_.top) < kEps ||
-         std::abs(cell_pos.y - kBorderRect_.height) < kEps;
+  return std::abs(cell_pos.x - kBorderCellsRect_.left) < kEps ||
+         std::abs(cell_pos.x - kBorderCellsRect_.width) < kEps ||
+         std::abs(cell_pos.y - kBorderCellsRect_.top) < kEps ||
+         std::abs(cell_pos.y - kBorderCellsRect_.height) < kEps;
 }
 
 Cell::State World::getUpdatedState(std::size_t cell_idx) noexcept {
@@ -166,7 +167,7 @@ std::optional<std::size_t> World::findIntersectionBFS(
   while (!queue.empty()) {
     auto cell_idx = queue.front();
     queue.pop();
-    if (is_visited[cell_idx]) continue;
+    if (is_visited[cell_idx] != 0) continue;
     is_visited[cell_idx] = 1;
     auto& cell = field_[cell_idx];
     if (cell.getState() == Cell::State::kBorder) continue;

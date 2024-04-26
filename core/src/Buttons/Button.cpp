@@ -4,8 +4,9 @@
 
 namespace ink {
 
-Button::Button(const sf::Font& font, std::string name, sf::RectangleShape rect)
-    : text_(font, std::move(name)), rect_(std::move(rect)) {
+Button::Button(const sf::Font& font, const std::string& name,
+               sf::RectangleShape rect)
+    : text_(font, name), rect_(std::move(rect)) {
   text_.setPosition(rect_.getPosition());
   text_.setCharacterSize(20);
 }

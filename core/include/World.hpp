@@ -53,7 +53,7 @@ class World final {
   const float kCellSizeEps_;
   const std::size_t kRowSize_;
   const std::size_t kColumnSize_;
-  const sf::FloatRect kBorderRect_;
+  const sf::FloatRect kBorderCellsRect_;
   sf::Time timer_;
   sf::Font font_;
 

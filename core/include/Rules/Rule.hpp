@@ -13,7 +13,7 @@ class Rule {
       : field_(field), kRowSize_(row_size) {}
 
   Rule(const Rule&) = delete;
-  Rule(Rule&&) = default;
+  Rule(Rule&&) = delete;
   Rule& operator=(const Rule&) = delete;
   Rule& operator=(Rule&&) = delete;
 

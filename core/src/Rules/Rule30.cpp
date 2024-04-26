@@ -7,7 +7,7 @@ namespace ink {
 
 Cell::State Rule30::getUpdatedState(std::size_t cell_idx) const noexcept {
   // Rule 30 CA implementaion
-  auto& cell = field_[cell_idx];
+  const auto& cell = field_[cell_idx];
   auto cell_state = cell.getState();
   if (cell_state == Cell::State::kBorder || cell_state == Cell::State::kActive)
     return cell_state;

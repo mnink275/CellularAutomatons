@@ -6,21 +6,18 @@ namespace ink {
 
 class Cell final : public sf::RectangleShape {
  public:
-  enum class State;
+  enum class [[nodiscard]] State{
+      kNone,
+      kActive,
+      kInactive,
+      kBorder,
+  };
 
-  Cell(sf::RectangleShape&& rect);
+  explicit Cell(sf::RectangleShape&& rect);
   Cell(sf::RectangleShape&& rect, State state);
 
   void setState(State state);
   State getState() const noexcept;
-
- public:
-  enum class State {
-    kNone,
-    kActive,
-    kInactive,
-    kBorder,
-  };
 
  private:
   State state_;
